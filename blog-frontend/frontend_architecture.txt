@@ -1,0 +1,96 @@
+========================================
+  FRONTEND ARCHITECTURE MAP — DevLog (Tech Blog Platform)
+========================================
+
+Role: Unauthenticated Visitor
+  Page: /signin  (Sign-in page — default landing)
+
+    Component: <SignInForm />
+      - Email + Password inputs with show/hide toggle
+      - Calls POST /api/auth/login on submit
+      - Falls back to demo mode if backend is offline
+      - Redirects to /feed on success
+      - Link to /signup for new users
+
+  Page: /signup  (Account creation)
+
+    Component: <SignUpForm />
+      - Name, Email, Password inputs with validation
+      - Calls POST /api/auth/signup on submit
+      - Falls back to demo mode if backend is offline
+      - Redirects to /feed on success
+      - Link back to /signin
+
+
+Role: Reader (Authenticated User)
+  Page: /feed  (Main landing page showing all articles)
+
+    Component: <TopNavbar />
+      - Shows DevLog logo (links to /feed)
+      - Shows logged-in user's name
+      - "Write a Post" button → /write
+      - Logout button → clears session, redirects to /signin
+
+    Component: <FeedContainer />
+      - Runs GET /api/articles on mount to fetch all published articles
+      - Falls back to mock sample articles if backend is offline
+      - Shows "Demo mode" banner when using mock data
+      - Renders a responsive 3-column grid of <ArticleCard /> components
+      - Shows loading spinner while fetching; empty state if no articles
+
+    Component: <ArticleCard />
+      - Shadcn Card showing: Title, Tags (as badges), Excerpt, Author, Date
+      - On click: silently fires POST /api/interactions to log a "view"
+      - Staggered fade-in animation (CSS animation-delay per card)
+
+
+Role: Author (Authenticated Content Creator)
+  Page: /write  (Publishing dashboard)
+
+    Component: <TopNavbar />
+      - (Reused) — "Write a Post" button hidden; shows "← Feed" back link
+
+    Component: <PublishForm />
+      - Shadcn inputs for: Title, Author (auto-filled from session), Tags, Content
+      - Tag input: type a tag + Enter to add; removable chips
+      - On submit: POST /api/articles with { title, content, author, tags }
+      - Falls back to simulated success if backend is offline
+      - Shows success toast + redirects to /feed after publish
+      - Shows error toast on real API failure
+
+
+========================================
+  API Endpoints Consumed
+========================================
+
+  POST   http://localhost:8000/api/auth/login       → Sign in user
+  POST   http://localhost:8000/api/auth/signup      → Register new user
+  GET    http://localhost:8000/api/articles         → Fetch all articles
+  POST   http://localhost:8000/api/articles         → Create a new article
+  POST   http://localhost:8000/api/interactions     → Log a view interaction
+
+
+========================================
+  Auth Strategy
+========================================
+
+  Client-side AuthContext (React Context API)
+  - Wraps entire app in layout.tsx
+  - Persists user object to localStorage
+  - Tries real backend → falls back to demo mode (any credentials work)
+  - useAuth() hook exposes: user, login(), signup(), logout()
+
+
+========================================
+  Tech Stack
+========================================
+
+  Framework   : Next.js 14 (App Router, TypeScript)
+  Styling     : Tailwind CSS
+  Components  : Shadcn UI (Button, Card, Input, Label, Textarea, Badge, Toast)
+  Fonts       : Lora (headings) + DM Sans (body) via Google Fonts
+  Icons       : Lucide React
+  Auth State  : React Context API + localStorage
+  HTTP Client : Native fetch() API
+  Proxy       : next.config.js rewrites  (/api/* → http://localhost:8000/api/*)
+  Demo Mode   : Mock data + mock auth when backend is offline
