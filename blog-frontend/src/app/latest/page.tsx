@@ -8,8 +8,6 @@ import TopNavbar from "@/components/TopNavbar";
 import { getTopicImage } from "@/utils/imageMapper";
 import { Button } from "@/components/ui/button";
 
-const BACKEND_URL = "http://localhost:8000";
-
 interface Article {
   id: string | number;
   title: string;
@@ -66,27 +64,39 @@ export default function LatestPage() {
   const latestFeatured = articles[0];
   const gridArticles = articles.slice(1);
 
+  // Custom reading time based on content length
+  const getReadTime = (content: string) => {
+    const wordCount = (content || "").split(/\s+/).length;
+    return Math.max(1, Math.ceil(wordCount / 160));
+  };
+
   return (
-    <div className="min-h-screen bg-[#FDFBF7] text-zinc-900 font-sans">
+    <div className="min-h-screen bg-[#FDFBF7] dark:bg-zinc-950 text-zinc-900 dark:text-zinc-50 transition-colors duration-500 font-sans">
       <TopNavbar />
 
       <main className="max-w-6xl mx-auto px-6 py-12">
+        
         {/* Section Header */}
         <div className="mb-12 text-center md:text-left">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-500/10 text-amber-700 text-xs font-bold uppercase tracking-wider mb-3">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-500/10 text-amber-700 dark:text-amber-400 text-xs font-bold uppercase tracking-wider mb-3">
             <Clock className="w-3.5 h-3.5" />
             <span>Chronological Updates</span>
           </div>
-          <h1 className="text-4xl md:text-5xl font-black tracking-tight font-serif" style={{ fontFamily: "Lora, serif" }}>
+          
+          <h1 
+            className="text-4xl md:text-5xl font-black tracking-tight text-zinc-950 dark:text-white font-serif" 
+            style={{ fontFamily: "Lora, serif" }}
+          >
             Latest Narrative Updates
           </h1>
-          <p className="text-zinc-600 mt-2 text-lg max-w-2xl font-light">
+          
+          <p className="text-zinc-650 dark:text-zinc-400 mt-2 text-lg max-w-2xl font-light">
             Stay up to date with fresh stories, creative announcements, developer tutorials, and cultural chronicles uploaded in real time.
           </p>
         </div>
 
         {loading ? (
-          <div className="py-24 text-center text-zinc-400 text-sm">
+          <div className="py-24 text-center text-zinc-400 text-sm font-light animate-pulse">
             Fetching fresh logs from database...
           </div>
         ) : (
@@ -94,29 +104,30 @@ export default function LatestPage() {
             
             {/* LATEST FEATURED POST AT TOP */}
             {latestFeatured && (
-              <div className="bg-white border border-zinc-200/80 rounded-3xl overflow-hidden shadow-xl p-6 md:p-8 flex flex-col lg:flex-row gap-8 items-center relative">
+              <div className="bg-white dark:bg-zinc-900/30 border border-zinc-200/80 dark:border-zinc-800/60 rounded-[32px] overflow-hidden shadow-xl p-6 md:p-8 flex flex-col lg:flex-row gap-8 items-center relative">
+                
                 {/* Visual Cover cover banner */}
                 <div 
                   onClick={() => router.push(`/article/${latestFeatured.id}`)}
                   className="w-full lg:w-1/2 h-72 md:h-96 rounded-2xl bg-zinc-950 overflow-hidden relative shrink-0 cursor-pointer group"
                 >
                   <div 
-                    className="absolute inset-0 bg-cover bg-center group-hover:scale-103 transition-transform duration-500"
+                    className="absolute inset-0 bg-cover bg-center group-hover:scale-103 transition-transform duration-700 ease-out"
                     style={{ backgroundImage: `url('${getTopicImage(latestFeatured.title, latestFeatured.tags)}')` }}
                   />
-                  <div className="absolute inset-0 bg-black/35" />
+                  <div className="absolute inset-0 bg-black/25 dark:bg-black/40" />
                   <div className="absolute top-4 left-4">
-                    <span className="px-3 py-1 rounded-full bg-amber-500 text-white font-bold text-[9px] uppercase tracking-widest shadow-md">
+                    <span className="px-3.5 py-1 rounded-full bg-amber-600 text-white font-bold text-[9px] uppercase tracking-widest shadow-md">
                       Freshly Released
                     </span>
                   </div>
                 </div>
 
                 {/* Meta details */}
-                <div className="flex-1 space-y-5">
-                  <div className="flex gap-1.5">
+                <div className="flex-1 space-y-5 font-sans">
+                  <div className="flex gap-2">
                     {latestFeatured.tags?.map(t => (
-                      <span key={t} className="text-[10px] font-bold tracking-wider uppercase text-amber-600">
+                      <span key={t} className="text-[9px] font-extrabold tracking-widest uppercase text-amber-700 dark:text-amber-400">
                         #{t}
                       </span>
                     ))}
@@ -124,48 +135,52 @@ export default function LatestPage() {
 
                   <h2 
                     onClick={() => router.push(`/article/${latestFeatured.id}`)}
-                    className="text-3xl md:text-4xl font-extrabold tracking-tight leading-tight hover:text-amber-600 transition-colors cursor-pointer"
+                    className="text-3xl md:text-4xl font-extrabold tracking-tight leading-tight hover:text-amber-600 dark:hover:text-amber-400 transition-colors cursor-pointer font-serif text-zinc-950 dark:text-white"
                     style={{ fontFamily: "Lora, serif" }}
                   >
                     {latestFeatured.title}
                   </h2>
 
-                  <p className="text-zinc-600 text-sm leading-relaxed font-light">
-                    {latestFeatured.content.slice(0, 200)}…
+                  <p className="text-zinc-550 dark:text-zinc-400 text-sm leading-relaxed font-light">
+                    {latestFeatured.content.slice(0, 240)}…
                   </p>
 
-                  <div className="flex items-center gap-6 pt-2 text-xs text-zinc-400">
+                  <div className="flex items-center gap-6 pt-2 text-xs text-zinc-400 dark:text-zinc-500">
                     <div className="flex items-center gap-2">
-                      <div className="w-7 h-7 rounded-full bg-amber-100 flex items-center justify-center font-bold text-amber-800 text-[10px]">
+                      <div className="w-7 h-7 rounded-full bg-amber-100 dark:bg-amber-950/40 flex items-center justify-center font-bold text-amber-800 dark:text-amber-400 text-[10px]">
                         {latestFeatured.author.charAt(0).toUpperCase()}
                       </div>
-                      <span className="font-semibold text-zinc-650">{latestFeatured.author}</span>
+                      <span className="font-semibold text-zinc-700 dark:text-zinc-300">{latestFeatured.author}</span>
                     </div>
-                    <div className="flex items-center gap-1">
-                      <Calendar className="w-3.5 h-3.5" />
+                    <div className="flex items-center gap-1.5">
+                      <Calendar className="w-3.5 h-3.5 text-amber-500" />
                       <span>Newest Upload</span>
                     </div>
                   </div>
 
                   <div className="pt-2">
                     <Link href={`/article/${latestFeatured.id}`}>
-                      <Button className="rounded-full bg-zinc-950 text-white px-6 h-10 text-xs font-semibold hover:opacity-90 flex items-center gap-1.5 shadow-md">
+                      <Button className="rounded-full bg-zinc-950 text-white dark:bg-white dark:text-zinc-950 px-7 h-11 text-xs font-bold tracking-widest uppercase hover:opacity-90 flex items-center gap-1.5 shadow-md">
                         Read Story <ArrowRight className="w-4 h-4" />
                       </Button>
                     </Link>
                   </div>
                 </div>
+
               </div>
             )}
 
             {/* RESPONSIVE BLOG GRID */}
-            <div className="space-y-6">
-              <h3 className="text-2xl font-bold tracking-tight border-b border-zinc-200 pb-3" style={{ fontFamily: "Lora, serif" }}>
+            <div className="space-y-6 pt-4">
+              <h3 
+                className="text-2xl font-bold tracking-tight border-b border-zinc-200/50 dark:border-zinc-800/50 pb-4 text-zinc-950 dark:text-white font-serif" 
+                style={{ fontFamily: "Lora, serif" }}
+              >
                 Recent Chronological Grids
               </h3>
 
               {gridArticles.length === 0 ? (
-                <div className="py-12 text-center text-zinc-400 text-sm">
+                <div className="py-12 text-center text-zinc-400 text-sm font-light">
                   No other articles in database feed yet.
                 </div>
               ) : (
@@ -174,38 +189,41 @@ export default function LatestPage() {
                     <article
                       key={a.id}
                       onClick={() => router.push(`/article/${a.id}`)}
-                      className="bg-white border border-zinc-200/80 rounded-2xl overflow-hidden hover:shadow-lg transition-all duration-300 cursor-pointer group flex flex-col h-full"
+                      className="bg-white dark:bg-zinc-900/40 border border-zinc-200/80 dark:border-zinc-800/60 rounded-3xl overflow-hidden hover:shadow-2xl hover:border-amber-500/30 dark:hover:border-amber-500/20 transition-all duration-500 cursor-pointer group flex flex-col h-full shadow-sm"
                     >
                       <div className="h-44 bg-zinc-950 overflow-hidden relative shrink-0">
                         <div 
-                          className="absolute inset-0 bg-cover bg-center group-hover:scale-105 transition-transform duration-500"
+                          className="absolute inset-0 bg-cover bg-center group-hover:scale-105 transition-transform duration-700 ease-out"
                           style={{ backgroundImage: `url('${getTopicImage(a.title, a.tags)}')` }}
                         />
-                        <div className="absolute inset-0 bg-black/35" />
+                        <div className="absolute inset-0 bg-black/25 dark:bg-black/40" />
                       </div>
 
-                      <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
-                        <div className="space-y-2">
+                      <div className="p-5 flex-1 flex flex-col justify-between space-y-4 font-sans">
+                        <div className="space-y-2.5">
                           <div className="flex flex-wrap gap-1">
                             {a.tags?.slice(0, 2).map(tag => (
-                              <span key={tag} className="text-[9px] font-bold tracking-wider uppercase px-2 py-0.5 bg-amber-500/5 text-amber-700 rounded">
-                                {tag}
+                              <span key={tag} className="text-[8px] font-extrabold tracking-widest uppercase px-2 py-0.5 bg-amber-500/5 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400">
+                                #{tag}
                               </span>
                             ))}
                           </div>
 
-                          <h4 className="font-bold text-base leading-snug group-hover:text-amber-600 transition-colors text-zinc-900 line-clamp-2" style={{ fontFamily: "Lora, serif" }}>
+                          <h4 
+                            className="font-bold text-base md:text-lg leading-snug group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors text-zinc-900 dark:text-white font-serif line-clamp-2" 
+                            style={{ fontFamily: "Lora, serif" }}
+                          >
                             {a.title}
                           </h4>
 
-                          <p className="text-zinc-500 text-xs line-clamp-3 leading-relaxed font-light">
+                          <p className="text-zinc-550 dark:text-zinc-400 text-xs leading-relaxed line-clamp-3 font-light">
                             {a.content}
                           </p>
                         </div>
 
-                        <div className="flex items-center justify-between pt-3 border-t border-zinc-100 text-[10px] text-zinc-400">
-                          <span className="font-semibold text-zinc-600">{a.author}</span>
-                          <span>4 min read</span>
+                        <div className="flex items-center justify-between pt-3 border-t border-zinc-100 dark:border-zinc-800/40 text-[10px] text-zinc-450 dark:text-zinc-500">
+                          <span className="font-bold text-zinc-700 dark:text-zinc-300">{a.author}</span>
+                          <span className="flex items-center gap-1"><Clock className="w-3.5 h-3.5 text-amber-500" /> {getReadTime(a.content)} min read</span>
                         </div>
                       </div>
                     </article>
@@ -219,7 +237,7 @@ export default function LatestPage() {
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-zinc-200 py-6 text-center text-xs text-zinc-450 mt-12 bg-white">
+      <footer className="border-t border-zinc-200/50 dark:border-zinc-800/50 py-8 text-center text-xs text-zinc-450 dark:text-zinc-555 mt-12 bg-white dark:bg-zinc-950 transition-colors">
         &copy; {new Date().getFullYear()} Epoch Creative. All rights reserved. Latest Stories Stream.
       </footer>
     </div>

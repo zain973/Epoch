@@ -7,8 +7,6 @@ import { BookOpen, Clock, Tag } from "lucide-react";
 import TopNavbar from "@/components/TopNavbar";
 import { getTopicImage } from "@/utils/imageMapper";
 
-const BACKEND_URL = "http://localhost:8000";
-
 interface Article {
   id: string | number;
   title: string;
@@ -75,44 +73,57 @@ export default function CategoryPage({ params }: { params: { name: string } }) {
     fetchCategoryArticles();
   }, [categoryName]);
 
+  // Reading time custom calculations
+  const getReadTime = (content: string) => {
+    const wordCount = (content || "").split(/\s+/).length;
+    return Math.max(1, Math.ceil(wordCount / 160));
+  };
+
   return (
-    <div className="min-h-screen bg-[#FDFBF7] text-zinc-900 font-sans">
+    <div className="min-h-screen bg-[#FDFBF7] dark:bg-zinc-950 text-zinc-900 dark:text-zinc-50 transition-colors duration-500 font-sans">
       <TopNavbar />
 
       <main className="max-w-5xl mx-auto px-6 py-12">
+        
         {/* Category Header */}
-        <div className="mb-12 border-b border-zinc-200 pb-8 flex flex-col md:flex-row md:items-end justify-between gap-4">
+        <div className="mb-12 border-b border-zinc-200/40 dark:border-zinc-800/40 pb-8 flex flex-col md:flex-row md:items-end justify-between gap-4">
           <div>
-            <div className="inline-flex items-center gap-1.5 text-amber-600 font-bold uppercase tracking-widest text-xs mb-2">
+            <div className="inline-flex items-center gap-1.5 text-amber-700 dark:text-amber-400 font-bold uppercase tracking-widest text-xs mb-2">
               <Tag className="w-3.5 h-3.5" />
               <span>Genre Collection</span>
             </div>
-            <h1 className="text-4xl md:text-5xl font-black capitalize tracking-tight font-serif" style={{ fontFamily: "Lora, serif" }}>
+            
+            <h1 
+              className="text-4xl md:text-5xl font-black capitalize tracking-tight font-serif text-zinc-950 dark:text-white" 
+              style={{ fontFamily: "Lora, serif" }}
+            >
               {categoryName}
             </h1>
-            <p className="text-zinc-550 text-sm mt-1 max-w-xl font-light">
+            
+            <p className="text-zinc-550 dark:text-zinc-400 text-sm mt-1.5 max-w-xl font-light">
               Browsing curated research logs, strategic essays, and visual portfolios categorized under our {categoryName} genre.
             </p>
           </div>
-          <span className="px-4 py-1.5 rounded-full bg-zinc-100 text-zinc-700 font-bold text-xs">
+
+          <span className="px-4 py-1.5 rounded-full bg-zinc-100 dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 font-bold text-xs shadow-inner">
             {articles.length} {articles.length === 1 ? "article" : "articles"} found
           </span>
         </div>
 
         {/* Dynamic Category Articles Grid */}
         {loading ? (
-          <div className="py-24 text-center text-zinc-400 text-sm">
+          <div className="py-24 text-center text-zinc-400 text-sm font-light animate-pulse">
             Filtering database shelves...
           </div>
         ) : articles.length === 0 ? (
-          <div className="py-24 text-center space-y-4">
-            <BookOpen className="w-12 h-12 mx-auto text-zinc-300" />
-            <h3 className="text-xl font-bold">No articles cataloged under {categoryName} yet</h3>
-            <p className="text-zinc-500 text-sm max-w-sm mx-auto">
+          <div className="py-24 text-center space-y-4 font-sans text-zinc-500">
+            <BookOpen className="w-12 h-12 mx-auto text-zinc-350 dark:text-zinc-800 animate-pulse" />
+            <h3 className="text-xl font-bold text-zinc-800 dark:text-zinc-250">No articles cataloged under {categoryName} yet</h3>
+            <p className="text-xs text-zinc-500 max-w-sm mx-auto font-light">
               Be the first to publish a creative update in the {categoryName} shelf!
             </p>
             <div className="pt-2">
-              <Link href="/write" className="px-5 py-2.5 rounded-full bg-zinc-950 text-white font-semibold text-xs shadow-md">
+              <Link href="/write" className="px-5 py-2.5 rounded-full bg-zinc-950 text-white dark:bg-white dark:text-zinc-950 font-bold tracking-widest uppercase text-[10px] shadow-lg">
                 Publish a Post &rarr;
               </Link>
             </div>
@@ -123,41 +134,46 @@ export default function CategoryPage({ params }: { params: { name: string } }) {
               <article 
                 key={art.id}
                 onClick={() => router.push(`/article/${art.id}`)}
-                className="bg-white border border-zinc-200/80 rounded-2xl overflow-hidden hover:shadow-lg transition-all duration-300 cursor-pointer group flex flex-col h-full"
+                className="bg-white dark:bg-zinc-900/40 border border-zinc-200/80 dark:border-zinc-800/60 rounded-3xl overflow-hidden hover:shadow-2xl hover:border-amber-500/30 dark:hover:border-amber-500/20 transition-all duration-500 cursor-pointer group flex flex-col h-full shadow-sm"
               >
-                {/* Dynamic cover matched cover cover */}
-                <div className="h-44 bg-zinc-950 overflow-hidden relative shrink-0">
+                
+                {/* Dynamic cover image with custom zoom transition */}
+                <div className="h-48 bg-zinc-950 overflow-hidden relative shrink-0">
                   <div 
-                    className="absolute inset-0 bg-cover bg-center group-hover:scale-105 transition-transform duration-500"
+                    className="absolute inset-0 bg-cover bg-center group-hover:scale-105 transition-transform duration-700 ease-out"
                     style={{ backgroundImage: `url('${getTopicImage(art.title, art.tags)}')` }}
                   />
-                  <div className="absolute inset-0 bg-black/35" />
+                  <div className="absolute inset-0 bg-black/25 dark:bg-black/45" />
                 </div>
 
-                <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
-                  <div className="space-y-2">
+                <div className="p-5 flex-1 flex flex-col justify-between space-y-4 font-sans">
+                  <div className="space-y-2.5">
                     <div className="flex flex-wrap gap-1">
                       {art.tags?.slice(0, 3).map(tag => (
-                        <span key={tag} className="text-[9px] font-bold tracking-wider uppercase px-2 py-0.5 bg-amber-500/5 text-amber-700 rounded">
-                          {tag}
+                        <span key={tag} className="text-[8px] font-extrabold tracking-widest uppercase px-2 py-0.5 bg-amber-500/5 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400">
+                          #{tag}
                         </span>
                       ))}
                     </div>
 
-                    <h3 className="font-bold text-base leading-snug group-hover:text-amber-600 transition-colors text-zinc-900 line-clamp-2" style={{ fontFamily: "Lora, serif" }}>
+                    <h3 
+                      className="font-bold text-base md:text-lg leading-snug group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors text-zinc-900 dark:text-white font-serif line-clamp-2" 
+                      style={{ fontFamily: "Lora, serif" }}
+                    >
                       {art.title}
                     </h3>
 
-                    <p className="text-zinc-500 text-xs line-clamp-3 leading-relaxed font-light">
+                    <p className="text-zinc-550 dark:text-zinc-400 text-xs leading-relaxed line-clamp-3 font-light">
                       {art.content}
                     </p>
                   </div>
 
-                  <div className="flex items-center justify-between pt-3 border-t border-zinc-100 text-[10px] text-zinc-400">
-                    <span className="font-semibold text-zinc-600">{art.author}</span>
-                    <span>4 min read</span>
+                  <div className="flex items-center justify-between pt-3 border-t border-zinc-100 dark:border-zinc-800/40 text-[10px] text-zinc-450 dark:text-zinc-500 font-sans">
+                    <span className="font-bold text-zinc-700 dark:text-zinc-300">{art.author}</span>
+                    <span className="flex items-center gap-1"><Clock className="w-3.5 h-3.5 text-amber-500" /> {getReadTime(art.content)} min read</span>
                   </div>
                 </div>
+
               </article>
             ))}
           </div>
@@ -165,7 +181,7 @@ export default function CategoryPage({ params }: { params: { name: string } }) {
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-zinc-200 py-6 text-center text-xs text-zinc-450 mt-12 bg-white">
+      <footer className="border-t border-zinc-200/50 dark:border-zinc-800/50 py-8 text-center text-xs text-zinc-450 dark:text-zinc-555 mt-12 bg-white dark:bg-zinc-950 transition-colors">
         &copy; {new Date().getFullYear()} Epoch Creative. All rights reserved. Dynamic Genre Shelves.
       </footer>
     </div>
